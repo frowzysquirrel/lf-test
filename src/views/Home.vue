@@ -37,7 +37,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 
 import Avatar from 'primevue/avatar';
@@ -46,6 +46,7 @@ import Button from 'primevue/button';
 const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).get('access_token');
 
 const router = useRouter();
+const route = useRoute();
 
 const login = (token: any, data: any) => {
   localStorage.setItem('lf2_token', token);
@@ -54,6 +55,11 @@ const login = (token: any, data: any) => {
 };
 
 onMounted(() => {
+  console.log(route.hash);
+  if (route.hash === '#feed') {
+    router.push('/feed');
+  }
+
   if (accessToken) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
     axios({
