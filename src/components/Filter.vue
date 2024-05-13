@@ -1,7 +1,7 @@
 <template>
   <Dropdown
     v-model="selectedGame"
-    :options="games"
+    :options="[{ name: 'All', id: undefined }, ...games]"
     optionLabel="name"
     placeholder="Filter by game"
     class="w-full md:w-14rem mr-1"
@@ -9,15 +9,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import Dropdown from 'primevue/dropdown';
 
+defineProps<{
+  games: { name: string; id: string }[];
+}>();
+
+// emits
+const emit = defineEmits(['filter:select']);
+
 const selectedGame = ref();
-const games = ref([
-  { name: 'New York', code: 'NY' },
-  { name: 'Rome', code: 'RM' },
-  { name: 'London', code: 'LDN' },
-  { name: 'Istanbul', code: 'IST' },
-  { name: 'Paris', code: 'PRS' },
-]);
+
+watch(selectedGame, () => {
+  emit('filter:select', selectedGame.value.id);
+});
 </script>

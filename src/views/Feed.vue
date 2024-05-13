@@ -1,14 +1,14 @@
 <template>
   <Header :isLoading="isLoading" :percentage="percentage" />
   <div class="px-1 py-2">
-    <!-- <Filter class="ml-1" /> -->
+    <Filter :games="games" @filter:select="handleFilterSelect" class="ml-1" />
     <div class="stream-grid px-1 py-2" v-if="streams.length">
       <a
         :href="`https://twitch.tv/${stream.user_name}`"
         :key="stream.id"
         rel="noopener noreferrer"
         target="_blank"
-        v-for="stream in streams"
+        v-for="stream in filteredStreams"
       >
         <Card>
           <template #content>
@@ -49,10 +49,13 @@ const router = useRouter();
 const user = JSON.parse(localStorage.getItem('lf2_user'));
 
 // refs
+const games = ref([]);
 const isLoading = ref(true);
-const streams = ref([]);
 const percentage = ref(0);
 const runs = ref(0);
+const selectedGameId = ref();
+const streams = ref([]);
+const filteredStreams = ref([]);
 const totalFollowers = ref(0);
 
 const getFollowers = async (cursor = '') => {
@@ -94,10 +97,23 @@ const getLiveFollowers = async () => {
 
       const liveUsers = response.data.data.map((stream) => stream);
       liveFollowers = [...liveFollowers, ...liveUsers];
+
       streams.value = [...liveFollowers];
-      // if (liveFollowers.length) {
-      //   break;
-      // }
+      filteredStreams.value = [...liveFollowers];
+
+      if (selectedGameId.value) {
+        filteredStreams.value = streams.value.filter(
+          (stream) => stream.game_id === selectedGameId.value,
+        );
+      }
+
+      games.value = Array.from(new Set(liveFollowers.map((stream) => stream.game_id))).map(
+        (id) => ({
+          id,
+          name: liveFollowers.find((stream) => stream.game_id === id).game_name,
+        }),
+      );
+
       runs.value += 100;
       percentage.value = Math.round((runs.value / totalFollowers.value) * 100);
     } while (cursor);
@@ -109,24 +125,22 @@ const getLiveFollowers = async () => {
   }
 };
 
-const getGames = async () => {
-  try {
-    const response = await axios({
-      url: 'https://api.twitch.tv/helix/games/top',
-      method: 'GET',
-      params: {
-        first: 100,
-      },
-    });
+const fetchData = async () => {
+  isLoading.value = true;
 
-    return response.data.data.map((game) => ({
-      name: game.name,
-      code: game.id,
-    }));
-  } catch (error) {
-    console.error('Error fetching games:', error);
-    throw error; // Handle the error appropriately in your application
+  const response = await getLiveFollowers();
+  localStorage.setItem('lf2_streams', JSON.stringify(response));
+  isLoading.value = false;
+};
+
+const handleFilterSelect = (gameId) => {
+  if (!gameId) {
+    filteredStreams.value = streams.value;
+    return;
   }
+
+  selectedGameId.value = gameId;
+  filteredStreams.value = streams.value.filter((stream) => stream.game_id === gameId);
 };
 
 onMounted(async () => {
@@ -136,42 +150,17 @@ onMounted(async () => {
   }
 
   // uncomment this block to cache streams
-  // const cachedStreams = localStorage.getItem('lf2_streamsstreams');
-  // if (cachedStreams) {
-  //   streams.value = JSON.parse(cachedStreams);
-  //   streams.value = [
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //     ...streams.value,
-  //   ];
-  //   isLoading.value = false;
-  //   return;
-  // }
+  const useCacheStreams = false;
+  const cachedStreams = localStorage.getItem('lf2_streams');
+  if (cachedStreams && useCacheStreams) {
+    streams.value = JSON.parse(cachedStreams);
+    console.log('Cached streams:', streams.value);
+    streams.value = [...streams.value, ...streams.value];
+    isLoading.value = false;
+    return;
+  }
 
-  getLiveFollowers()
-    .then((response) => {
-      // streams.value = response;
-      localStorage.setItem('lf2_streamsstreams', JSON.stringify(response));
-      isLoading.value = false;
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+  fetchData();
 });
 </script>
 
