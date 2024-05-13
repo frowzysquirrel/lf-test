@@ -1,7 +1,7 @@
 <template>
   <Header :isLoading="isLoading" :percentage="percentage" />
   <div class="px-1 py-2">
-    <div class="flex-between flex-align-center flex-gap-1 px-1">
+    <div class="flex-between flex-align-center flex-gap-1 px-1 filters">
       <Filter :games="games" @filter:select="handleFilterSelect" />
       <div>
         <label for="mutualsOnly" class="mr-05"> Mutuals only </label>
@@ -196,5 +196,16 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
+}
+
+.filters {
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    > div {
+      width: 100%;
+    }
+  }
 }
 </style>
