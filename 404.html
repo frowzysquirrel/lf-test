@@ -11,7 +11,7 @@
     <script>
       const redirectUrl = `${window.location.protocol}//${
         window.location.host
-      }/#${window.location.pathname.replace('/', '#')}`;
+      }/${window.location.pathname.replace('/', '#')}`;
       window.location.replace(redirectUrl);
     </script>
   </body>
