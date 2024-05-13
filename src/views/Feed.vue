@@ -1,10 +1,24 @@
 <template>
   <Header :isLoading="isLoading" :percentage="percentage" />
   <div class="px-1 py-2">
-    <Filter :games="games" @filter:select="handleFilterSelect" class="ml-1" />
-    <div class="stream-grid px-1 py-2" v-if="streams.length">
-      <StreamerCard v-for="stream in filteredStreams" :stream="stream" :key="stream.id" />
+    <div class="flex-between flex-align-center flex-gap-1 px-1">
+      <Filter :games="games" @filter:select="handleFilterSelect" />
+      <div>
+        <label for="mutualsOnly" class="mr-05"> Mutuals only </label>
+        <Checkbox v-model="mutualsOnly" :binary="true" name="mutualsOnly" />
+      </div>
     </div>
+    <div class="stream-grid px-1 py-2" v-if="streams.length">
+      <StreamerCard
+        v-for="stream in filteredStreams"
+        :stream="stream"
+        :key="stream.id"
+        @update:stream="handleUpdateStream"
+      />
+    </div>
+    <p class="text-center" v-if="streams.length && !filteredStreams.length">
+      No streams match your filter criteria.
+    </p>
     <Footer />
   </div>
 </template>
@@ -12,9 +26,10 @@
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import axios from 'axios';
 import Card from 'primevue/card';
+import Checkbox from 'primevue/checkbox';
 
 import Footer from '../components/Footer.vue';
 import LoadingMessages from '../components/LoadingMessages.vue';
@@ -30,13 +45,14 @@ const user = JSON.parse(localStorage.getItem(constants.lf_user));
 const useCacheStreams = false;
 
 // refs
+const filteredStreams = ref([]);
 const games = ref([]);
 const isLoading = ref(true);
+const mutualsOnly = ref(false);
 const percentage = ref(0);
 const runs = ref(0);
 const selectedGameId = ref();
 const streams = ref([]);
-const filteredStreams = ref([]);
 const totalFollowers = ref(0);
 
 const getFollowers = async (cursor = '') => {
@@ -79,14 +95,28 @@ const getLiveFollowers = async () => {
       const liveUsers = response.data.data.map((stream) => stream);
       liveFollowers = [...liveFollowers, ...liveUsers];
 
+      liveFollowers = await Promise.all(
+        liveFollowers.map(async (stream) => {
+          const response = await axios({
+            url: 'https://api.twitch.tv/helix/channels/followed',
+            method: 'GET',
+            params: {
+              user_id: user.id,
+              broadcaster_id: stream.user_id,
+            },
+          });
+
+          return {
+            ...stream,
+            followed: response.data.data && response.data.data.length,
+          };
+        }),
+      );
+
       streams.value = [...liveFollowers];
       filteredStreams.value = [...liveFollowers];
 
-      if (selectedGameId.value) {
-        filteredStreams.value = streams.value.filter(
-          (stream) => stream.game_id === selectedGameId.value,
-        );
-      }
+      filterStreams();
 
       games.value = Array.from(new Set(liveFollowers.map((stream) => stream.game_id))).map(
         (id) => ({
@@ -114,15 +144,33 @@ const fetchData = async () => {
   isLoading.value = false;
 };
 
-const handleFilterSelect = (gameId) => {
-  if (!gameId) {
+const filterStreams = () => {
+  if (selectedGameId.value) {
+    filteredStreams.value = streams.value.filter(
+      (stream) => stream.game_id === selectedGameId.value,
+    );
+  } else {
     filteredStreams.value = streams.value;
-    return;
   }
 
-  selectedGameId.value = gameId;
-  filteredStreams.value = streams.value.filter((stream) => stream.game_id === gameId);
+  if (mutualsOnly.value) {
+    filteredStreams.value = filteredStreams.value.filter((stream) => stream.followed);
+  }
 };
+
+const handleFilterSelect = (gameId) => {
+  selectedGameId.value = gameId;
+  filterStreams();
+};
+
+const handleUpdateStream = (stream) => {
+  const index = streams.value.findIndex((s) => s.id === stream.id);
+  streams.value[index] = stream;
+};
+
+watch(mutualsOnly, (value) => {
+  filterStreams();
+});
 
 onMounted(async () => {
   if (!axios.defaults.headers.common['Authorization']) {

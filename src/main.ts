@@ -21,7 +21,7 @@ if (localStorage.getItem(constants.lf_token)) {
 
 const app = createApp(App);
 
-app.use(PrimeVue);
+app.use(PrimeVue, { ripple: true });
 app.use(router);
 
 app.mount('#app');

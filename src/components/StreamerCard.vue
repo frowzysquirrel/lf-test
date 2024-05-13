@@ -2,9 +2,9 @@
   <a :href="`https://twitch.tv/${stream.user_name}`" rel="noopener noreferrer" target="_blank">
     <Card>
       <template #content>
-        <Badge value="Followed" severity="success" v-if="followed" />
+        <Badge value="Followed" severity="success" v-if="stream.followed" />
         <img :src="stream.thumbnail_url.replace('{width}', '440').replace('{height}', '248')" />
-        <Badge :value="getViewersBadge" severity="contrast"></Badge>
+        <Tag :value="getViewersTag" severity="contrast"></Tag>
         <div class="text-content">
           <p :title="stream.title">
             <strong>{{ stream.title }}</strong>
@@ -21,15 +21,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
-import axios from 'axios';
+import { computed } from 'vue';
 
 import Card from 'primevue/card';
 import Tag from 'primevue/tag';
 import Badge from 'primevue/badge';
-import { onMounted } from 'vue';
-
-import constants from '../constants';
 
 const props = defineProps<{
   stream: {
@@ -41,30 +37,13 @@ const props = defineProps<{
     user_id: string;
     user_name: string;
     viewer_count: number;
+    followed: boolean;
   };
 }>();
 
-const followed = ref();
-
-const getViewersBadge = computed(
+const getViewersTag = computed(
   () => `${props.stream.viewer_count} viewer${props.stream.viewer_count > 1 ? 's' : ''}`,
 );
-
-onMounted(async () => {
-  const user = JSON.parse(localStorage.getItem(constants.lf_user) || '');
-  const response = await axios({
-    url: 'https://api.twitch.tv/helix/channels/followed',
-    method: 'GET',
-    params: {
-      user_id: user.id,
-      broadcaster_id: props.stream.user_id,
-    },
-  });
-
-  if (response.data.data && response.data.data.length) {
-    followed.value = true;
-  }
-});
 </script>
 
 <style lang="scss" scoped>
@@ -101,7 +80,7 @@ p {
   right: -5px;
   top: -10px;
 }
-.p-badge-contrast {
+.p-tag-contrast {
   position: absolute;
   top: 30px;
   opacity: 0.8;
