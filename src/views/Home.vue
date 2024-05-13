@@ -43,14 +43,16 @@ import axios from 'axios';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 
+import constants from '../constants';
+
 const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).get('access_token');
 
 const router = useRouter();
 const route = useRoute();
 
 const login = (token: any, data: any) => {
-  localStorage.setItem('lf2_token', token);
-  localStorage.setItem('lf2_user', JSON.stringify(data));
+  localStorage.setItem(constants.lf_token, token);
+  localStorage.setItem(constants.lf_user, JSON.stringify(data));
   router.push('/feed');
 };
 

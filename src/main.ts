@@ -9,10 +9,14 @@ import 'primevue/resources/themes/aura-dark-purple/theme.css';
 import 'primeicons/primeicons.css';
 import './style.scss';
 
+import constants from './constants';
+
 axios.defaults.headers.common['Client-ID'] = 'znofr1uhmvzkox39rihc8eq647ijue';
 
-if (localStorage.getItem('lf2_token')) {
-  axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('lf2_token')}`;
+if (localStorage.getItem(constants.lf_token)) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem(
+    constants.lf_token,
+  )}`;
 }
 
 const app = createApp(App);

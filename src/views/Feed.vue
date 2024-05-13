@@ -3,29 +3,7 @@
   <div class="px-1 py-2">
     <Filter :games="games" @filter:select="handleFilterSelect" class="ml-1" />
     <div class="stream-grid px-1 py-2" v-if="streams.length">
-      <a
-        :href="`https://twitch.tv/${stream.user_name}`"
-        :key="stream.id"
-        rel="noopener noreferrer"
-        target="_blank"
-        v-for="stream in filteredStreams"
-      >
-        <Card>
-          <template #content>
-            <img :src="stream.thumbnail_url.replace('{width}', '440').replace('{height}', '248')" />
-            <div class="text-content">
-              <p :title="stream.title">
-                <strong>{{ stream.title }}</strong>
-              </p>
-              <p class="mt-05">{{ stream.user_name }}</p>
-              <p>{{ stream.game_name }}</p>
-              <p class="mt-05" :title="stream.tags.join(', ')">
-                <Tag class="mr-05" v-for="tag in stream.tags" :key="tag" :value="tag" />
-              </p>
-            </div>
-          </template>
-        </Card>
-      </a>
+      <StreamerCard v-for="stream in filteredStreams" :stream="stream" :key="stream.id" />
     </div>
     <Footer />
   </div>
@@ -37,16 +15,19 @@ import { onMounted } from 'vue';
 import { ref } from 'vue';
 import axios from 'axios';
 import Card from 'primevue/card';
-import Tag from 'primevue/tag';
 
 import Footer from '../components/Footer.vue';
 import LoadingMessages from '../components/LoadingMessages.vue';
 import Header from '../components/Header.vue';
 import Filter from '../components/Filter.vue';
+import StreamerCard from '../components/StreamerCard.vue';
+
+import constants from '../constants';
 
 const router = useRouter();
 
-const user = JSON.parse(localStorage.getItem('lf2_user'));
+const user = JSON.parse(localStorage.getItem(constants.lf_user));
+const useCacheStreams = false;
 
 // refs
 const games = ref([]);
@@ -129,7 +110,7 @@ const fetchData = async () => {
   isLoading.value = true;
 
   const response = await getLiveFollowers();
-  localStorage.setItem('lf2_streams', JSON.stringify(response));
+  localStorage.setItem(constants.lf_streams, JSON.stringify(response));
   isLoading.value = false;
 };
 
@@ -149,13 +130,11 @@ onMounted(async () => {
     return;
   }
 
-  // uncomment this block to cache streams
-  const useCacheStreams = false;
-  const cachedStreams = localStorage.getItem('lf2_streams');
+  const cachedStreams = localStorage.getItem(constants.lf_streams);
   if (cachedStreams && useCacheStreams) {
     streams.value = JSON.parse(cachedStreams);
-    console.log('Cached streams:', streams.value);
-    streams.value = [...streams.value, ...streams.value];
+    filteredStreams.value = JSON.parse(cachedStreams);
+    filteredStreams.value = [...filteredStreams.value, ...filteredStreams.value];
     isLoading.value = false;
     return;
   }
@@ -169,30 +148,5 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
-}
-img {
-  width: 100%;
-}
-
-.p-card:hover {
-  transform: scale(1.05);
-  transition: all ease 0.3s;
-}
-
-.text-content {
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-p {
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 100%;
-
-  strong {
-    display: inline-flex;
-    height: 26px;
-    align-items: center;
-  }
 }
 </style>

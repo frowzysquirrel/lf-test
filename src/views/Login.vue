@@ -20,7 +20,7 @@ const twitchLogin = () => {
     `https://id.twitch.tv/oauth2/authorize` +
     `?client_id=${axios.defaults.headers.common['Client-ID']}` +
     `&redirect_uri=${redirectUri}` +
-    `&scope=moderator:read:followers` +
+    `&scope=moderator:read:followers user:read:follows` +
     `&response_type=token`;
   window.location.href = url;
 };

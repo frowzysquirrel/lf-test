@@ -30,9 +30,11 @@
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router';
 
+import constants from '../constants';
+
 const logout = () => {
-  localStorage.removeItem('lf2_token');
-  localStorage.removeItem('lf2_user');
+  localStorage.removeItem(constants.lf_token);
+  localStorage.removeItem(constants.lf_user);
   window.location.href = '/';
 };
 </script>
