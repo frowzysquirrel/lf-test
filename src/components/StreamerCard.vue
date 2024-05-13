@@ -103,7 +103,7 @@ p {
 }
 .p-badge-contrast {
   position: absolute;
-  top: 145px;
+  top: 30px;
   opacity: 0.8;
   left: 30px;
 }
