@@ -31,8 +31,8 @@
 import { RouterLink } from 'vue-router';
 
 const logout = () => {
-  localStorage.removeItem('lf_token');
-  localStorage.removeItem('lf_user');
+  localStorage.removeItem('lf2_token');
+  localStorage.removeItem('lf2_user');
   window.location.href = '/';
 };
 </script>

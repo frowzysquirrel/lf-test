@@ -46,7 +46,7 @@ import Filter from '../components/Filter.vue';
 
 const router = useRouter();
 
-const user = JSON.parse(localStorage.getItem('lf_user'));
+const user = JSON.parse(localStorage.getItem('lf2_user'));
 
 // refs
 const isLoading = ref(true);
@@ -136,7 +136,7 @@ onMounted(async () => {
   }
 
   // uncomment this block to cache streams
-  // const cachedStreams = localStorage.getItem('lf_streams');
+  // const cachedStreams = localStorage.getItem('lf2_streamsstreams');
   // if (cachedStreams) {
   //   streams.value = JSON.parse(cachedStreams);
   //   streams.value = [
@@ -166,7 +166,7 @@ onMounted(async () => {
   getLiveFollowers()
     .then((response) => {
       // streams.value = response;
-      localStorage.setItem('lf_streams', JSON.stringify(response));
+      localStorage.setItem('lf2_streamsstreams', JSON.stringify(response));
       isLoading.value = false;
     })
     .catch((error) => {

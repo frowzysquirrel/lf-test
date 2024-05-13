@@ -11,8 +11,8 @@ import './style.scss';
 
 axios.defaults.headers.common['Client-ID'] = 'znofr1uhmvzkox39rihc8eq647ijue';
 
-if (localStorage.getItem('lf_token')) {
-  axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('lf_token')}`;
+if (localStorage.getItem('lf2_token')) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('lf2_token')}`;
 }
 
 const app = createApp(App);

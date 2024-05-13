@@ -48,8 +48,8 @@ const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).
 const router = useRouter();
 
 const login = (token: any, data: any) => {
-  localStorage.setItem('lf_token', token);
-  localStorage.setItem('lf_user', JSON.stringify(data));
+  localStorage.setItem('lf2_token', token);
+  localStorage.setItem('lf2_user', JSON.stringify(data));
   router.push('/feed');
 };
 
