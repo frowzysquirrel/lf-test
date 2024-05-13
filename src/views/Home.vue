@@ -9,7 +9,7 @@
     <h3>LiveFollowr+ gives you the ability to see which of your followers are live on Twitch.</h3>
   </div>
   <div class="text-center mt-3">
-    <RouterLink to="/login">
+    <RouterLink to="/feed">
       <Button label="Go to your feed" />
     </RouterLink>
   </div>
@@ -36,13 +36,39 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
+
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 
-const loginWithTwitch = () => {
-  // Logic to redirect user to Twitch login page
-  // You'll handle this in the router or with a library like OAuth2
+const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).get('access_token');
+
+const router = useRouter();
+
+const login = (token: any, data: any) => {
+  localStorage.setItem('lf_token', token);
+  localStorage.setItem('lf_user', JSON.stringify(data));
+  router.push('/feed');
 };
+
+onMounted(() => {
+  if (accessToken) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+    axios({
+      url: 'https://api.twitch.tv/helix/users',
+      method: 'GET',
+    })
+      .then((response) => {
+        login(accessToken, response.data.data[0]);
+      })
+      .catch((errorResponse) => {
+        console.log(errorResponse);
+        router.push('/login');
+      });
+  }
+});
 </script>
 
 <style lang="scss" scoped>

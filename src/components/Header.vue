@@ -8,7 +8,9 @@
       <LoadingMessages class="mt-05" />
     </div>
     <div class="text-center p-1" v-if="!isLoading">
-      <img src="../assets/logo.png" alt="LiveFollowr+" class="logo" />
+      <RouterLink to="/">
+        <img src="../assets/logo.png" alt="LiveFollowr+" class="logo" />
+      </RouterLink>
     </div>
   </div>
 </template>
