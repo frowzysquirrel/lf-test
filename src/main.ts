@@ -7,6 +7,8 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 
 import { globalCookiesConfig } from 'vue3-cookies';
+import mixpanel from 'mixpanel-browser';
+import Hotjar from '@hotjar/browser';
 
 import App from './App.vue';
 import router from './routes';
@@ -28,3 +30,11 @@ app.use(ToastService);
 app.use(router);
 
 app.mount('#app');
+
+mixpanel.init(appEnv.VITE_MIXPANEL_PROJECT_TOKEN, {
+  persistence: 'localStorage',
+  persistence_name: 'lf',
+  track_pageview: true,
+});
+
+Hotjar.init(appEnv.VITE_HOTJAR_SITE_ID, 6);

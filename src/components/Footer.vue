@@ -12,6 +12,8 @@
         >. <br />
         If you have any questions or suggestions, drop us a message on Twitter ❤️
       </p>
+      <br />
+      <small>You are logged in as {{ user.display_name }}</small>
       <br /><br />
       <p>
         <RouterLink to="/faq">
@@ -28,14 +30,26 @@
 </template>
 
 <script lang="ts" setup>
+// vue
+import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 
+// libs
 import { useCookies } from 'vue3-cookies';
 
+// utils
 import constants from '../constants';
 
+// types
+import { User } from '../types';
+
+// vars
 const { cookies } = useCookies();
 
+// refs
+const user = ref(<User>(<unknown>cookies.get(constants.lf_user)));
+
+// functions
 const logout = () => {
   cookies.remove(constants.lf_token);
   cookies.remove(constants.lf_user);

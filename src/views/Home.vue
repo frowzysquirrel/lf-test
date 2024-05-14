@@ -45,6 +45,7 @@ import { useRouter, useRoute } from 'vue-router';
 // libs
 import axios from 'axios';
 import { useCookies } from 'vue3-cookies';
+import mixpanel from 'mixpanel-browser';
 
 // primevue
 import Avatar from 'primevue/avatar';
@@ -63,6 +64,13 @@ const { cookies } = useCookies();
 const login = (token: any, data: any) => {
   cookies.set(constants.lf_token, token);
   cookies.set(constants.lf_user, JSON.stringify(data));
+
+  mixpanel.identify(data.display_name);
+  mixpanel.people.set({
+    $avatar: data.profile_image_url,
+    $name: data.display_name,
+  });
+
   router.push('/feed');
 };
 

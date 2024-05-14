@@ -9,8 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hotjar/browser": "^1.0.9",
     "@niku/vite-env-caster": "^1.0.2",
     "axios": "^1.6.8",
+    "mixpanel-browser": "^2.50.0",
     "primeicons": "^7.0.0",
     "primevue": "^3.52.0",
     "sass": "^1.77.1",

@@ -77,7 +77,7 @@ const currentText = () =>
     : 'Analyzing Followers Hidden Matrix';
 
 const startTimer = () => {
-  timer = setInterval(() => {
+  timer = <any>setInterval(() => {
     currentIndex.value = getRandomIndex();
   }, getRandomInterval());
 };

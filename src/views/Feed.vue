@@ -45,9 +45,7 @@ import StreamerCard from '../components/StreamerCard.vue';
 import constants from '../constants';
 
 // types
-type User = {
-  id: string;
-};
+import { User } from '../types';
 
 // vars
 const router = useRouter();
