@@ -5,6 +5,7 @@ import appEnv from 'app-env';
 
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 
 import { globalCookiesConfig } from 'vue3-cookies';
 import mixpanel from 'mixpanel-browser';
@@ -27,6 +28,7 @@ const app = createApp(App);
 
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
+app.use(ConfirmationService);
 app.use(router);
 
 app.mount('#app');

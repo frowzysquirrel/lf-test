@@ -1,41 +1,53 @@
 <template>
-  <div class="text-center p-2">
+  <div class="text-center p-1">
     <h1>Frequent Asked Questions</h1>
-    <br /><br />
-    <h2>What is LiveFollowr+?</h2>
+
+    <h2>What is <strong>LiveFollowr+</strong>?</h2>
     <p>
-      <br />
-      LiveFollowr+ gives you the ability to see which of your followers are live on Twitch.
+      <strong>LiveFollowr+</strong> gives you the ability to see which of your followers are live on
+      Twitch.
     </p>
-    <br />
-    <h2>Why was LiveFollowr+ created?</h2>
+
+    <h2>Why was <strong>LiveFollowr+</strong> created?</h2>
     <p>
-      <br />
-      LiveFollowr+ was created so that streamers could have another way of connecting with
-      followers. As of now, Twitch does not include such a feature.
+      <strong>LiveFollowr+</strong> was created so that streamers could have another way of
+      connecting with followers. As of now, Twitch does not include such a feature.
     </p>
-    <br />
-    <h2>Is LiveFollowr+ free?</h2>
-    <p>
-      <br />
-      YES! 100% FREE!
-    </p>
-    <br />
+
+    <h2>Is <strong>LiveFollowr+</strong> free?</h2>
+    <p>YES! 100% FREE!</p>
+
     <h2>How else can I support you?</h2>
     <p>
+      <strong>FlashForce:</strong>
       <br />
-      <strong>FlashForce:</strong><br />
-      <a href="https://www.twitch.tv/flashforce" target="_blank">https://www.twitch.tv/flashforce</a
-      ><br />
+      <a href="https://www.twitch.tv/flashforce" target="_blank"
+        >https://www.twitch.tv/flashforce</a
+      >
+      <br />
       <a href="https://www.youtube.com/c/flashforce" target="_blank"
         >https://www.youtube.com/c/flashforce</a
       >
       <br /><br />
-      <strong>Frowzy:</strong><br />
-      <a href="https://www.youtube.com/FrowzySquirrel" target="_blank"
-        >https://www.youtube.com/FrowzySquirrel</a
+      <strong>Frowzy:</strong>
+      <br />
+      <a href="https://solo.to/frowzysquirrel" target="_blank">https://solo.to/frowzysquirrel</a>
+      <br />
+      <a href="https://frowzysquirrel-shop.fourthwall.com/" target="_blank"
+        >https://frowzysquirrel-shop.fourthwall.com/</a
       >
-      <br /><br />
     </p>
   </div>
 </template>
+
+<style lang="scss" scoped>
+h2 {
+  margin-top: 3rem;
+}
+@media (min-width: 768px) {
+  .text-center {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+</style>

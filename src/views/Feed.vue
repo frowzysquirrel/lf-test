@@ -1,24 +1,26 @@
 <template>
-  <Header :isLoading="isLoading" :percentage="percentage" />
-  <div class="px-1 py-2">
-    <div class="flex-start flex-align-center flex-gap-3 px-1 filters" v-if="streams.length">
-      <Filter :games="games" @filter:select="handleFilterSelect" />
-      <div class="flex-start flex-align-center flex-gap-1">
-        <span>Sort by viewer count</span>
-        <Button :icon="getSortIcon" @click="handleSort" aria-label="Sort" severity="help" />
+  <div v-if="didUserAcceptCookies">
+    <Header :isLoading="isLoading" :percentage="percentage" />
+    <div class="px-1 py-2">
+      <div class="flex-start flex-align-center flex-gap-3 px-1 filters" v-if="streams.length">
+        <Filter :games="games" @filter:select="handleFilterSelect" />
+        <div class="flex-start flex-align-center flex-gap-1">
+          <span>Sort by viewer count</span>
+          <Button :icon="getSortIcon" @click="handleSort" aria-label="Sort" severity="help" />
+        </div>
+        <div>
+          <label for="mutualsOnly" class="mr-05"> Mutuals only </label>
+          <Checkbox v-model="mutualsOnly" :binary="true" name="mutualsOnly" />
+        </div>
       </div>
-      <div>
-        <label for="mutualsOnly" class="mr-05"> Mutuals only </label>
-        <Checkbox v-model="mutualsOnly" :binary="true" name="mutualsOnly" />
+      <div class="stream-grid px-1 py-2" v-if="streams.length">
+        <StreamerCard v-for="stream in filteredStreams" :stream="stream" :key="stream.id" />
       </div>
+      <p class="text-center" v-if="streams.length && !filteredStreams.length">
+        No streams match your filter criteria.
+      </p>
+      <Footer />
     </div>
-    <div class="stream-grid px-1 py-2" v-if="streams.length">
-      <StreamerCard v-for="stream in filteredStreams" :stream="stream" :key="stream.id" />
-    </div>
-    <p class="text-center" v-if="streams.length && !filteredStreams.length">
-      No streams match your filter criteria.
-    </p>
-    <Footer />
   </div>
 </template>
 
@@ -35,6 +37,8 @@ import { useCookies } from 'vue3-cookies';
 import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
 
+import { useConfirm } from 'primevue/useconfirm';
+
 // components
 import Footer from '../components/Footer.vue';
 import Header from '../components/Header.vue';
@@ -48,12 +52,14 @@ import constants from '../constants';
 import { User } from '../types';
 
 // vars
+const { cookies } = useCookies();
+const confirm = useConfirm();
 const router = useRouter();
 const useCacheStreams = false;
-const { cookies } = useCookies();
 const user = <User>(<unknown>cookies.get(constants.lf_user));
 
 // refs
+const didUserAcceptCookies = ref(<boolean>false);
 const filteredStreams = ref(<any[]>[]);
 const games = ref(<any[]>[]);
 const isLoading = ref(true);
@@ -61,9 +67,9 @@ const mutualsOnly = ref(false);
 const percentage = ref(0);
 const runs = ref(0);
 const selectedGameId = ref();
+const sortByViewerCountAsc = ref(true);
 const streams = ref(<any[]>[]);
 const totalFollowers = ref(0);
-const sortByViewerCountAsc = ref(true);
 
 // watchers
 watch(mutualsOnly, () => {
@@ -197,8 +203,7 @@ const handleSort = () => {
   filterStreams();
 };
 
-// lifecycle
-onMounted(async () => {
+const onAcceptCookies = () => {
   if (!axios.defaults.headers.common['Authorization']) {
     router.push('/login');
     return;
@@ -214,6 +219,35 @@ onMounted(async () => {
   }
 
   fetchData();
+};
+
+// lifecycle
+onMounted(async () => {
+  didUserAcceptCookies.value = !!localStorage.getItem('lf_cookiesAccepted');
+
+  if (!didUserAcceptCookies.value) {
+    confirm.require({
+      message: 'This website uses cookies to ensure you get the best experience',
+      header: 'Coookies Consent Required',
+      icon: 'pi pi-exclamation-triangle',
+      rejectClass: 'p-button-secondary p-button-outlined',
+      rejectLabel: 'Reject',
+      acceptLabel: 'Accept',
+      onHide: () => {
+        window.location.href = '/';
+      },
+      accept: () => {
+        localStorage.setItem('lf_cookiesAccepted', 'true');
+        didUserAcceptCookies.value = !!localStorage.getItem('lf_cookiesAccepted');
+        onAcceptCookies();
+      },
+      reject: () => {
+        window.location.href = '/';
+      },
+    });
+  } else {
+    onAcceptCookies();
+  }
 });
 </script>
 

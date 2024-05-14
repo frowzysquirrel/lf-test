@@ -17,9 +17,18 @@
       <br /><br />
       <p>
         <RouterLink to="/faq">
-          <small>Read our FAQ</small>
+          <small>FAQ</small>
         </RouterLink>
         <br />
+        <RouterLink to="/privacy">
+          <small>Privacy</small>
+        </RouterLink>
+        <br />
+
+        <RouterLink to="/terms">
+          <small>Terms of service</small>
+        </RouterLink>
+        <br /><br />
         <a href="#" @click="logout()">
           <small>Logout</small>
         </a>

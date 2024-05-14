@@ -4,6 +4,8 @@ import Feed from './views/Feed.vue';
 import Home from './views/Home.vue';
 import Login from './views/Login.vue';
 import Faq from './views/Faq.vue';
+import Privacy from './views/Privacy.vue';
+import Terms from './views/Terms.vue';
 
 const router = createRouter({
   history: createWebHistory('/'),
@@ -27,6 +29,16 @@ const router = createRouter({
       path: '/feed',
       name: 'feed',
       component: Feed,
+    },
+    {
+      path: '/privacy',
+      name: 'privacy',
+      component: Privacy,
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: Terms,
     },
     { path: '/:pathMatch(.*)*', redirect: '/home' },
   ],
