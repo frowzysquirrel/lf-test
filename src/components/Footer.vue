@@ -1,20 +1,22 @@
 <template>
   <footer>
     <div class="text-center mt-3">
-      <p>
+      <small>
         <span>LiveFollowr+</span> is a free tool for Twitch streamers created by
         <a href="https://twitter.com/flashforceplays" target="_blank">
           <strong>FlashForce</strong>
         </a>
         &
         <a href="https://twitter.com/FrowzySquirrel" target="_blank">
-          <strong>FrowzySquirrel</strong> </a
-        >. <br />
-        If you have any questions or suggestions, drop us a message on Twitter ❤️
-      </p>
-      <br />
-      <small>You are logged in as {{ user.display_name }}</small>
+          <strong>FrowzySquirrel</strong>
+        </a>
+        <br />
+        If you have any questions or suggestions, contact us at
+        <a href="mailto:livefollowr@gmail.com">livefollowr@gmail.com</a>
+      </small>
       <br /><br />
+      <small>You are logged in as {{ user.display_name }}</small>
+      <br />
       <p>
         <RouterLink to="/faq">
           <small>FAQ</small>
