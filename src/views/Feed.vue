@@ -1,8 +1,15 @@
 <template>
   <div v-if="didUserAcceptCookies">
     <Header :isLoading="isLoading" :percentage="percentage" />
-    <div class="px-1 py-2">
-      <div class="flex-start flex-align-center flex-gap-3 px-1 filters" v-if="streams.length">
+    <p class="pl-2">
+      <small>
+        Successfully parsed {{ formatNumber(runs) }} out of
+        {{ formatNumber(totalFollowers) }} followers. Discovered
+        {{ formatNumber(streams.length) }} live streams.
+      </small>
+    </p>
+    <div class="px-1 pt-1 pb-2">
+      <div class="flex-start flex-align-center flex-gap-2 px-1 filters" v-if="streams.length">
         <Filter :games="games" @filter:select="handleFilterSelect" />
         <div class="flex-start flex-align-center flex-gap-1">
           <span>Sort by viewer count</span>
@@ -56,21 +63,31 @@ const { cookies } = useCookies();
 const confirm = useConfirm();
 const router = useRouter();
 const useCacheStreams = false;
+const useTestUser = false;
 const user = <User>(<unknown>cookies.get(constants.lf_user));
 const token = cookies.get(constants.lf_token);
 
+if (useTestUser) {
+  axios.defaults.headers.common['Authorization'] = `Bearer 77z2l0i0amdialdxhvh6ey0rzhxtp4`;
+  user.id = '102762045';
+}
+
 // refs
+const cursor = ref('');
 const didUserAcceptCookies = ref(<boolean>false);
 const filteredStreams = ref(<any[]>[]);
 const games = ref(<any[]>[]);
 const isLoading = ref(true);
 const mutualsOnly = ref(false);
 const percentage = ref(0);
+const rateLimitHit = ref(false);
+const rateLimitReset = ref(0);
 const runs = ref(0);
 const selectedGameId = ref();
 const sortByViewerCountAsc = ref(true);
 const streams = ref(<any[]>[]);
 const totalFollowers = ref(0);
+const twitchError = ref(false);
 
 // watchers
 watch(mutualsOnly, () => {
@@ -83,87 +100,6 @@ const getSortIcon = computed(() =>
 );
 
 // functions
-const getFollowers = async (cursor = '') => {
-  try {
-    const response = await axios({
-      url: 'https://api.twitch.tv/helix/channels/followers',
-      method: 'GET',
-      params: {
-        broadcaster_id: user.id,
-        first: 100,
-        after: cursor, // Pass the cursor for pagination
-      },
-    });
-
-    const { data, pagination, total } = response.data;
-    totalFollowers.value = total;
-    const followers = data.map((follower: any) => follower.user_login);
-    const nextCursor = pagination && pagination.cursor ? pagination.cursor : '';
-    return { followers, nextCursor };
-  } catch (error) {
-    console.error('Error fetching followers:', error);
-    throw error; // Handle the error appropriately in your application
-  }
-};
-
-const getLiveFollowers = async () => {
-  try {
-    let liveFollowers = <any[]>[];
-    let cursor = '';
-    do {
-      const { followers, nextCursor } = await getFollowers(cursor);
-      cursor = nextCursor;
-      const response = await axios({
-        url: `https://api.twitch.tv/helix/streams?first=100&user_login=${followers.join(
-          '&user_login=',
-        )}`,
-        method: 'GET',
-      });
-
-      const liveUsers = response.data.data.map((stream: any) => stream);
-      liveFollowers = [...liveFollowers, ...liveUsers];
-
-      liveFollowers = await Promise.all(
-        liveFollowers.map(async (stream) => {
-          const response = await axios({
-            url: 'https://api.twitch.tv/helix/channels/followed',
-            method: 'GET',
-            params: {
-              user_id: user.id,
-              broadcaster_id: stream.user_id,
-            },
-          });
-
-          return {
-            ...stream,
-            followed: response.data.data && response.data.data.length,
-          };
-        }),
-      );
-
-      streams.value = [...liveFollowers];
-      filteredStreams.value = [...liveFollowers];
-
-      filterStreams();
-
-      games.value = Array.from(new Set(liveFollowers.map((stream) => stream.game_id))).map(
-        (id) => ({
-          id,
-          name: liveFollowers.find((stream) => stream.game_id === id).game_name,
-        }),
-      );
-
-      runs.value += 100;
-      percentage.value = Math.round((runs.value / totalFollowers.value) * 100);
-    } while (cursor);
-
-    return liveFollowers;
-  } catch (error) {
-    console.error('Error fetching live followers:', error);
-    throw error; // Handle the error appropriately in your application
-  }
-};
-
 const fetchData = async () => {
   isLoading.value = true;
 
@@ -194,6 +130,108 @@ const filterStreams = () => {
   }
 };
 
+const formatNumber = (number: number) => {
+  return new Intl.NumberFormat().format(number);
+};
+
+const getFollowers = async () => {
+  try {
+    const response = await axios({
+      url: 'https://api.twitch.tv/helix/channels/followers',
+      method: 'GET',
+      params: {
+        broadcaster_id: user.id,
+        first: 100,
+        after: cursor.value, // Pass the cursor for pagination
+      },
+    });
+
+    const { data, pagination, total } = response.data;
+    totalFollowers.value = total;
+    const followers = data.map((follower: any) => follower.user_login);
+    const nextCursor = pagination && pagination.cursor ? pagination.cursor : '';
+    return { followers, nextCursor };
+  } catch (error) {
+    parseTwitchError(error);
+  }
+};
+
+const getLiveFollowers = async () => {
+  try {
+    let liveFollowers = <any[]>[];
+    do {
+      const followers = await getFollowers();
+      cursor.value = followers?.nextCursor;
+
+      const liveStreams = await getStreams(followers?.followers);
+      const mutuals = await getMutuals(liveStreams);
+
+      liveFollowers = [...liveFollowers, ...mutuals];
+
+      console.log(liveFollowers);
+
+      streams.value = [...liveFollowers];
+      filteredStreams.value = [...liveFollowers];
+
+      filterStreams();
+
+      games.value = Array.from(new Set(liveFollowers.map((stream) => stream.game_id))).map(
+        (id) => ({
+          id,
+          name: liveFollowers.find((stream) => stream.game_id === id).game_name,
+        }),
+      );
+
+      runs.value += 100;
+      percentage.value = Math.round((runs.value / totalFollowers.value) * 100);
+    } while (cursor.value && !rateLimitHit.value && !twitchError.value);
+
+    return liveFollowers;
+  } catch (error) {
+    console.error('Error fetching live followers:', error);
+    throw error; // Handle the error appropriately in your application
+  }
+};
+
+const getMutuals = async (liveUsers: any) => {
+  return await Promise.all(
+    liveUsers.map(async (stream: any) => {
+      try {
+        const response = await axios({
+          url: 'https://api.twitch.tv/helix/channels/followed',
+          method: 'GET',
+          params: {
+            user_id: user.id,
+            broadcaster_id: stream.user_id,
+          },
+        });
+
+        return {
+          ...stream,
+          followed: response.data.data && response.data.data.length,
+        };
+      } catch (error) {
+        parseTwitchError(error);
+      }
+    }),
+  );
+};
+
+const getStreams = async (followers: any) => {
+  try {
+    const response = await axios({
+      url: `https://api.twitch.tv/helix/streams?first=100&user_login=${followers.join(
+        '&user_login=',
+      )}&type=live`,
+      method: 'GET',
+    });
+
+    return response.data.data;
+  } catch (error) {
+    parseTwitchError(error);
+  }
+};
+
 const handleFilterSelect = (gameId: string) => {
   selectedGameId.value = gameId;
   filterStreams();
@@ -220,6 +258,14 @@ const onAcceptCookies = () => {
   }
 
   fetchData();
+};
+
+const parseTwitchError = (error: any) => {
+  twitchError.value = true;
+  if (error.response && error.response.status === 429) {
+    rateLimitHit.value = true;
+    rateLimitReset.value = error.response.headers['Ratelimit-Reset'];
+  }
 };
 
 // lifecycle
