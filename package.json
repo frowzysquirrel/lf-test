@@ -1,12 +1,13 @@
 {
   "name": "livefollowr",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev --open",
     "build": "vite build",
-    "preview": "vite preview"
+    "dev": "vite dev --open",
+    "preview": "vite preview",
+    "catv": "commit-and-tag-version"
   },
   "dependencies": {
     "@hotjar/browser": "^1.0.9",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/node": "^20.12.11",
     "@vitejs/plugin-vue": "^5.0.4",
+    "commit-and-tag-version": "^12.4.1",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
     "vue-tsc": "^2.0.6"
