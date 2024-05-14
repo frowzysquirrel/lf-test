@@ -57,6 +57,7 @@ const confirm = useConfirm();
 const router = useRouter();
 const useCacheStreams = false;
 const user = <User>(<unknown>cookies.get(constants.lf_user));
+const token = cookies.get(constants.lf_token);
 
 // refs
 const didUserAcceptCookies = ref(<boolean>false);
@@ -223,6 +224,12 @@ const onAcceptCookies = () => {
 
 // lifecycle
 onMounted(async () => {
+  const testUsers = ['flashforce', 'frowzysquirrel'];
+
+  if (testUsers.includes(user.display_name.toLowerCase())) {
+    console.log('Logged in as:', user.display_name, user.id, token);
+  }
+
   didUserAcceptCookies.value = !!localStorage.getItem('lf_cookiesAccepted');
 
   if (!didUserAcceptCookies.value) {
