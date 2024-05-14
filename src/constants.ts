@@ -1,4 +1,4 @@
-const version = 3;
+const version = 4;
 
 export default {
   lf_user: `lf_${version}_user`,

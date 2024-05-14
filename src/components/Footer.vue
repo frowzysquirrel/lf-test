@@ -30,11 +30,15 @@
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router';
 
+import { useCookies } from 'vue3-cookies';
+
 import constants from '../constants';
 
+const { cookies } = useCookies();
+
 const logout = () => {
-  localStorage.removeItem(constants.lf_token);
-  localStorage.removeItem(constants.lf_user);
+  cookies.remove(constants.lf_token);
+  cookies.remove(constants.lf_user);
   window.location.href = '/';
 };
 </script>

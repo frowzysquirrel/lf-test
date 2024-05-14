@@ -38,28 +38,41 @@
 </template>
 
 <script setup lang="ts">
+// vue
 import { onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
 
+// libs
+import axios from 'axios';
+import { useCookies } from 'vue3-cookies';
+
+// primevue
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 
+// utils
 import constants from '../constants';
 
+// vars
 const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).get('access_token');
-
 const router = useRouter();
 const route = useRoute();
+const { cookies } = useCookies();
 
+// functions
 const login = (token: any, data: any) => {
-  localStorage.setItem(constants.lf_token, token);
-  localStorage.setItem(constants.lf_user, JSON.stringify(data));
+  cookies.set(constants.lf_token, token);
+  cookies.set(constants.lf_user, JSON.stringify(data));
   router.push('/feed');
 };
 
+// lifecycle
 onMounted(() => {
-  console.log(route.hash);
+  const lfToken = cookies.get(constants.lf_token);
+  if (lfToken) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${lfToken}`;
+  }
+
   if (route.hash === '#feed') {
     router.push('/feed');
   }

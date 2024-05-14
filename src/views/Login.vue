@@ -5,12 +5,16 @@
 </template>
 
 <script setup lang="ts">
+// vue
 import { onMounted } from 'vue';
+
+// libs
 import axios from 'axios';
+
+// primevue
 import ProgressSpinner from 'primevue/progressspinner';
 
-const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).get('access_token');
-
+// functions
 const twitchLogin = () => {
   const redirectUri =
     window.location.host === 'livefollowr.com'
@@ -20,11 +24,12 @@ const twitchLogin = () => {
     `https://id.twitch.tv/oauth2/authorize` +
     `?client_id=${axios.defaults.headers.common['Client-ID']}` +
     `&redirect_uri=${redirectUri}` +
-    `&scope=moderator:read:followers user:read:follows` +
+    `&scope=moderator:read:followers user:read:follows channel:manage:raids` +
     `&response_type=token`;
   window.location.href = url;
 };
 
+// lifecycle
 onMounted(() => {
   twitchLogin();
 });
