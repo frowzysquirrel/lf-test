@@ -63,7 +63,7 @@ import constants from '../constants';
 import { User } from '../types';
 
 // constants
-const USE_TEST_USER = true;
+const USE_TEST_USER = false;
 const USE_CACHE_STREAMS = false;
 
 // vars
@@ -179,27 +179,27 @@ const getLiveFollowers = async () => {
       
       liveFollowers = [...liveFollowers, ...mutuals];
       
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
-      getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
+      // getMutuals(liveFollowers);
       
       streams.value = [...liveFollowers];
       filteredStreams.value = [...liveFollowers];
