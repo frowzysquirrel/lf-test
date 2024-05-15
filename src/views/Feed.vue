@@ -326,7 +326,7 @@ const updateRateLimits = (response: any) => {
 onMounted(async () => {
   const testUsers = ['flashforce', 'frowzysquirrel'];
 
-  if (testUsers.includes(user.display_name.toLowerCase())) {
+  if (user && testUsers.includes(user.display_name.toLowerCase())) {
     console.log('Logged in as:', user.display_name, user.id, token);
   }
 
