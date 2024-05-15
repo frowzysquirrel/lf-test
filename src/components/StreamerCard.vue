@@ -120,8 +120,8 @@ p {
 }
 .p-badge-success {
   position: absolute;
-  right: -5px;
-  top: -13px;
+  right: -2px;
+  top: -5px;
   z-index: 1;
 }
 .p-tag-contrast {
