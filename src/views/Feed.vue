@@ -70,12 +70,12 @@ const USE_CACHE_STREAMS = false;
 const { cookies } = useCookies();
 const confirm = useConfirm();
 const router = useRouter();
-const user = <User>(<unknown>cookies.get(constants.lf_user)) || {};
+const user = <User>(<unknown>cookies.get(constants.lf_user));
 const token = cookies.get(constants.lf_token);
 let rateLimitReset = 0;
 let rateLimitRemaining = Number.MAX_SAFE_INTEGER;
 
-if (USE_TEST_USER) {
+if (user && USE_TEST_USER) {
   axios.defaults.headers.common['Authorization'] = `Bearer 77z2l0i0amdialdxhvh6ey0rzhxtp4`;
   user.id = '102762045';
 }
@@ -280,7 +280,7 @@ const handleSort = () => {
 };
 
 const onAcceptCookies = () => {
-  if (!axios.defaults.headers.common['Authorization']) {
+  if (!axios.defaults.headers.common['Authorization'] || !user) {
     router.push('/login');
     return;
   }
@@ -292,6 +292,12 @@ const onAcceptCookies = () => {
     filteredStreams.value = [...filteredStreams.value, ...filteredStreams.value];
     isLoading.value = false;
     return;
+  }
+
+  const testUsers = ['flashforce', 'frowzysquirrel'];
+
+  if (testUsers.includes(user.display_name.toLowerCase())) {
+    console.log('Logged in as:', user.display_name, user.id, token);
   }
 
   fetchData();
@@ -324,12 +330,6 @@ const updateRateLimits = (response: any) => {
 
 // lifecycle
 onMounted(async () => {
-  const testUsers = ['flashforce', 'frowzysquirrel'];
-
-  if (user && testUsers.includes(user.display_name.toLowerCase())) {
-    console.log('Logged in as:', user.display_name, user.id, token);
-  }
-
   didUserAcceptCookies.value = !!localStorage.getItem('lf_cookiesAccepted');
 
   if (!didUserAcceptCookies.value) {

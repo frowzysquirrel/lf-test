@@ -15,7 +15,7 @@
         <a href="mailto:livefollowr@gmail.com">livefollowr@gmail.com</a>
       </small>
       <br /><br />
-      <small>You are logged in as {{ user.display_name }}</small>
+      <small>You are logged in as {{ user?.display_name }}</small>
       <br />
       <p>
         <RouterLink to="/faq">

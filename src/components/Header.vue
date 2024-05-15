@@ -2,7 +2,7 @@
   <div class="header px-3 py-05 text-center">
     <div v-if="isLoading">
       <small>
-        Welcome, {{ user.display_name }}! <br /><br />
+        Welcome, {{ user?.display_name }}! <br /><br />
         If it takes a bit to load, congratulations! That means you have a lot of followers ❤️
       </small>
       <ProgressBar class="mt-05" :value="percentage"></ProgressBar>
