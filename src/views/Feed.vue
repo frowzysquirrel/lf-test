@@ -1,15 +1,15 @@
 <template>
   <div v-if="didUserAcceptCookies">
-    <Header :isLoading="isLoading" :percentage="percentage" />
-    <p class="flex-between flex-align-center px-2">
+    <Header :isLoading="isLoading && !rateLimitHit" :percentage="percentage" />
+    <p class="flex-between flex-align-center px-2 stats">
       <small>
         Successfully parsed
         {{ runs > totalFollowers ? formatNumber(totalFollowers) : formatNumber(runs) }} out of
         {{ formatNumber(totalFollowers) }} followers. Discovered
         {{ formatNumber(streams.length) }} live streams.
       </small>
-      <div v-if="timeUntilReset">
-        <small>⚠️ Twitch API rate limit reached. We'll resume in {{ timeUntilReset }}</small>
+      <div v-if="rateLimitHit">
+        <small>⚠️ Twitch API is taking a nap! Retrying in {{ retryCountdown }} seconds...</small>
       </div>
     </p>
     <div class="px-1 pt-1 pb-2">
@@ -72,8 +72,6 @@ const confirm = useConfirm();
 const router = useRouter();
 const user = <User>(<unknown>cookies.get(constants.lf_user));
 const token = cookies.get(constants.lf_token);
-let rateLimitReset = 0;
-let rateLimitRemaining = Number.MAX_SAFE_INTEGER;
 
 if (user && USE_TEST_USER) {
   axios.defaults.headers.common['Authorization'] = `Bearer 77z2l0i0amdialdxhvh6ey0rzhxtp4`;
@@ -89,13 +87,13 @@ const isLoading = ref(true);
 const mutualsOnly = ref(false);
 const percentage = ref(0);
 const rateLimitHit = ref(false);
+const retryCountdown = ref(10);
 const runs = ref(0);
 const selectedGameId = ref();
 const sortByViewerCountAsc = ref(true);
 const streams = ref(<any[]>[]);
 const totalFollowers = ref(0);
 const twitchError = ref(false);
-const timeUntilReset = ref('');
 
 // watchers
 watch(mutualsOnly, () => {
@@ -154,8 +152,6 @@ const getFollowers = async () => {
       },
     });
 
-    updateRateLimits(response);
-
     const { data, pagination, total } = response.data;
     totalFollowers.value = total;
     const followers = data.map((follower: any) => follower.user_login);
@@ -176,30 +172,7 @@ const getLiveFollowers = async () => {
       const liveStreams = await getStreams(followers?.followers);
       const mutuals = await getMutuals(liveStreams);
 
-      
       liveFollowers = [...liveFollowers, ...mutuals];
-      
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
-      // getMutuals(liveFollowers);
       
       streams.value = [...liveFollowers];
       filteredStreams.value = [...liveFollowers];
@@ -217,7 +190,7 @@ const getLiveFollowers = async () => {
 
       runs.value += 100;
       percentage.value = Math.round((runs.value / totalFollowers.value) * 100);
-    } while (cursor.value && !twitchError.value);
+    } while (cursor.value && !twitchError.value && !rateLimitHit.value);
 
     return liveFollowers;
   } catch (error) {
@@ -239,8 +212,6 @@ const getMutuals = async (liveUsers: any) => {
           },
         });
 
-        updateRateLimits(response);
-
         return {
           ...stream,
           followed: response.data.data && response.data.data.length,
@@ -260,8 +231,6 @@ const getStreams = async (followers: any) => {
       )}&type=live`,
       method: 'GET',
     });
-
-    updateRateLimits(response);
 
     return response.data.data;
   } catch (error) {
@@ -305,27 +274,23 @@ const onAcceptCookies = () => {
 
 const handleTwitchError = (error: any) => {
   twitchError.value = true;
+
   if (error.response && error.response.status === 429) {
+    if (!rateLimitHit.value) {
     rateLimitHit.value = true;
-
-    setInterval(() => {
-      const now = Math.floor(Date.now() / 1000);
-      console.log('rateLimitReset', rateLimitReset, 'now', now)
-      const timeRemaining = rateLimitReset - now;
-
-      const minutes = Math.floor((timeRemaining % 3600) / 60);
-      const seconds = Math.floor(timeRemaining % 60);
-      timeUntilReset.value = `${minutes}min ${seconds}s`;
+    const retryInterval = setInterval(() => {
+      retryCountdown.value -= 1;
+      if (retryCountdown.value === 0) {
+        rateLimitHit.value = false;
+        retryCountdown.value = 10;
+        twitchError.value = false;
+        fetchData();
+        clearInterval(retryInterval);
+      }
     }, 1000);
+    }
+
   }
-};
-
-const updateRateLimits = (response: any) => {
-  console.log(response);
-  rateLimitReset = response.headers['ratelimit-reset'];
-  rateLimitRemaining = response.headers['ratelimit-remaining'];
-
-  console.log('rateLimitReset', rateLimitReset, 'rateLimitRemaining', rateLimitRemaining);
 };
 
 // lifecycle
@@ -373,6 +338,14 @@ onMounted(async () => {
     > div {
       width: 100%;
     }
+  }
+}
+
+.stats {
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
   }
 }
 </style>
