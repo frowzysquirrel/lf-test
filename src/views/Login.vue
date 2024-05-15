@@ -16,10 +16,12 @@ import ProgressSpinner from 'primevue/progressspinner';
 
 // functions
 const twitchLogin = () => {
-  const redirectUri =
-    window.location.host === 'livefollowr.com'
-      ? 'https://livefollowr.com'
-      : 'http://localhost:5173';
+  let redirectUri = `${window.location.protocol}//${window.location.host}`;
+
+  if (window.location.host === 'localhost') {
+    redirectUri += ':5173';
+  }
+
   const url =
     `https://id.twitch.tv/oauth2/authorize` +
     `?client_id=${axios.defaults.headers.common['Client-ID']}` +
