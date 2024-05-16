@@ -31,6 +31,10 @@
           <small>Terms of service</small>
         </RouterLink>
         <br /><br />
+        <RouterLink to="/">
+          <small>Back to home</small>
+        </RouterLink>
+        <br /><br />
         <a href="#" @click="logout()">
           <small>Logout</small>
         </a>
