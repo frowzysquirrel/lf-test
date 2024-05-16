@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
+import Config from './views/Config.vue';
+import Faq from './views/Faq.vue';
 import Feed from './views/Feed.vue';
 import Home from './views/Home.vue';
 import Login from './views/Login.vue';
-import Faq from './views/Faq.vue';
 import Privacy from './views/Privacy.vue';
 import Terms from './views/Terms.vue';
 
@@ -19,6 +20,11 @@ const router = createRouter({
       path: '/faq',
       name: 'faq',
       component: Faq,
+    },
+    {
+      path: '/config',
+      name: 'config',
+      component: Config,
     },
     {
       path: '/login',

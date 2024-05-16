@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 
 import axios from 'axios';
 import appEnv from 'app-env';
+import { VueFire } from 'vuefire';
 
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
@@ -13,6 +14,7 @@ import Hotjar from '@hotjar/browser';
 
 import App from './App.vue';
 import router from './routes';
+import { firebaseApp } from './store';
 
 import 'primevue/resources/themes/aura-dark-purple/theme.css';
 import 'primeicons/primeicons.css';
@@ -30,6 +32,7 @@ app.use(PrimeVue, { ripple: true });
 app.use(ToastService);
 app.use(ConfirmationService);
 app.use(router);
+app.use(VueFire, { firebaseApp });
 
 app.mount('#app');
 

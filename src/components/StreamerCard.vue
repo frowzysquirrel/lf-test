@@ -18,6 +18,7 @@
           @click="handleRaidClick"
         />
       </div>
+      <Badge value="Featured" severity="primary" v-if="featured" />
       <Badge value="Followed" severity="success" v-if="stream.followed" />
       <img :src="stream.thumbnail_url.replace('{width}', '440').replace('{height}', '248')" />
       <Tag :value="getViewersTag" severity="contrast"></Tag>
@@ -57,6 +58,7 @@ const toast = useToast();
 
 // props
 const props = defineProps<{
+  featured?: boolean;
   stream: {
     game_name: string;
     id: string;
@@ -121,6 +123,12 @@ p {
 .p-badge-success {
   position: absolute;
   right: -2px;
+  top: -5px;
+  z-index: 1;
+}
+.p-badge:not(.p-badge-success) {
+  position: absolute;
+  left: -2px;
   top: -5px;
   z-index: 1;
 }

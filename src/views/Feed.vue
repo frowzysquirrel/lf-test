@@ -24,8 +24,9 @@
           <Checkbox v-model="mutualsOnly" :binary="true" name="mutualsOnly" />
         </div>
       </div>
-      <div class="stream-grid px-1 py-2" v-if="streams.length">
-        <StreamerCard v-for="stream in filteredStreams" :stream="stream" :key="stream.id" />
+      <div class="stream-grid px-1 py-2">
+        <StreamerCard featured  v-if="featuredStreamer" :stream="featuredStreamer as any" />
+        <StreamerCard v-for="stream in filteredStreams" :stream="stream" :key="stream.id" v-if="streams.length" />
       </div>
       <p class="text-center" v-if="streams.length && !filteredStreams.length">
         No streams match your filter criteria.
@@ -43,6 +44,10 @@ import { computed, onMounted, ref, watch } from 'vue';
 // libs
 import axios from 'axios';
 import { useCookies } from 'vue3-cookies';
+
+// db
+import { onSnapshot } from 'firebase/firestore';
+import { featuredCollection } from '../store';
 
 // primevue
 import Checkbox from 'primevue/checkbox';
@@ -81,6 +86,8 @@ if (user && USE_TEST_USER) {
 // refs
 const cursor = ref('');
 const didUserAcceptCookies = ref(<boolean>false);
+const featured = ref('');
+const featuredStreamer = ref(null);
 const filteredStreams = ref(<any[]>[]);
 const games = ref(<any[]>[]);
 const isLoading = ref(true);
@@ -133,6 +140,12 @@ const filterStreams = () => {
 
   if (mutualsOnly.value) {
     filteredStreams.value = filteredStreams.value.filter((stream) => stream.followed);
+  }
+
+  // filter out featured if present
+  if (featuredStreamer.value) {
+    // @ts-ignore
+    filteredStreams.value = filteredStreams.value.filter((stream) => stream.user_id !== featuredStreamer.value?.user_id);
   }
 };
 
@@ -270,6 +283,21 @@ const onAcceptCookies = () => {
   }
 
   fetchData();
+
+  onSnapshot(featuredCollection, async (snapshot) => {
+    const featuredData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    // @ts-ignore
+    featured.value = featuredData[0]?.featured;
+    const featuredStream = await axios({
+      url: `https://api.twitch.tv/helix/streams?user_login=${featured.value}&type=live`,
+      method: 'GET',
+    });
+
+    if (featuredStream.data.data) {
+      const getMutual = await getMutuals(featuredStream.data.data);
+      featuredStreamer.value = getMutual[0];
+    }
+  });
 };
 
 const handleTwitchError = (error: any) => {

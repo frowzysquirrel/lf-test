@@ -34,6 +34,13 @@
         />
       </a>
     </div>
+    <div class="flex-column text-center mt-5" v-if="isAdmin()">
+      <small>Admin only</small>
+      <br />
+      <RouterLink to="/config">
+        <Button severity="secondary" label="Set featured streamer" />
+      </RouterLink>
+    </div>
   </div>
 </template>
 
@@ -53,12 +60,14 @@ import Button from 'primevue/button';
 
 // utils
 import constants from '../constants';
+import { useUser } from '../user';
 
 // vars
-const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).get('access_token');
-const router = useRouter();
-const route = useRoute();
 const { cookies } = useCookies();
+const { isAdmin } = useUser();
+const accessToken = new URLSearchParams(window.location.hash.replace('#', '?')).get('access_token');
+const route = useRoute();
+const router = useRouter();
 
 // functions
 const login = (token: any, data: any) => {
